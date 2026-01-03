@@ -1,0 +1,41 @@
+// Game init
+init():
+  set canvas size / logical resolution (decide fixed vs responsive)
+  create paddle, ball, bricks array
+  set lives = 3, score = 0
+  start main loop (requestAnimationFrame or Clock)
+
+main loop(dt):
+  handle_input()            # mouse/touch -> paddle.x (clamp)
+  ball.pos += ball.velocity * dt  # or per-frame step if simpler
+  check_wall_collisions()
+  if ball.y < bottom:
+    lives -= 1
+    if lives == 0: game_over()
+    else: reset_ball_and_paddle()
+  if circle_rect_collision(ball, paddle):
+    handle_paddle_collision()   # invert/reflect & optionally modify vx by hit offset
+  for each brick in bricks:
+    if circle_rect_collision(ball, brick):
+      remove brick, score += N
+      handle_brick_collision()  # reflect velocity (see below)
+  if bricks.empty(): you_win()
+  render()  # draw ball, paddle, bricks, UI (score/lives)
+
+  # Matter.js specifics / critical boilerplate to add:
+# - Create engine and world: engine = Matter.Engine.create(); world = engine.world
+# - Disable gravity for top-down breakout: engine.world.gravity.y = 0
+# - Use Runner.run(engine) or call Engine.update(engine, dt_ms) inside game loop (use fixed 1000/60 ms timestep)
+# - Bodies:
+#     Ball = Bodies.circle(x,y,r, { restitution: 1, friction: 0, frictionAir: 0, inertia: Infinity, label: 'ball' })
+#     Paddle = Bodies.rectangle(x,y,w,h, { isStatic: true, label: 'paddle' })  # set position on input with Body.setPosition
+#     Walls = static Bodies for left/right/top. Bottom can be a sensor (isSensor: true) to detect life loss.
+#     Bricks = static Bodies with unique labels/ids so they can be removed on collision.
+# - Use Events.on(engine, 'collisionStart', handler) to detect collisions (check pair.bodyA.label/bodyB.label)
+# - When a brick collides: Composite.remove(world, brick); update score; remove from local list
+# - For paddle collisions: optionally compute hitOffset = (ball.x - paddle.x)/paddle.width to modify ball velocity direction manually using Body.setVelocity(ball, newVel)
+# - Keep ball speed constant: after collisions normalize velocity and scale to desired speed to prevent slowdowns or runaway acceleration
+# - Prevent tunneling: keep small timestep (60Hz), ensure restitution/friction settings, and consider increasing position/velocity iterations in engine if needed
+# - Debug rendering: use Matter.Render for dev, or draw from Composite.allBodies(world) to your own canvas
+# - Collision filtering (category/mask) can simplify identifying sensors vs gameplay bodies
+# - Remember to remove event listeners and bodies when resetting or changing levels
