@@ -186,5 +186,13 @@ Matter.Events.on(engine, 'afterUpdate', function() {
 - Optimize for mobile devices
 - Add pause functionality
 - Design and add background music
+- Remove the bar above the game that is blocking the text at the top left corner
+- Implement touch controls for mobile devices
+- Add animations for brick destruction
+- Create a high score leaderboard
+- Add different brick types (e.g., unbreakable, multi-hit)
+- Possibly import p5.js for enhanced graphics and effects
+- Possibly import a sound library for better audio management
+- Possibly import phaser for input handling?
 
 */
