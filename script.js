@@ -177,6 +177,7 @@ Matter.Events.on(engine, 'afterUpdate', function() {
 
 
 /* To do:
+- Add walls to left and right sides
 - Add sound effects for collisions
 - Add scoring system
 - Improve graphics and add colors to bricks
@@ -194,5 +195,6 @@ Matter.Events.on(engine, 'afterUpdate', function() {
 - Possibly import p5.js for enhanced graphics and effects
 - Possibly import a sound library for better audio management
 - Possibly import phaser for input handling?
+- Paddle should have some friction to the ball to allow for angled shots
 
 */
