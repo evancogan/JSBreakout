@@ -24,6 +24,13 @@ const render = Render.create({
 // This starts the renderer
 Render.run(render);
 
+const canvas = render.canvas;
+['touchstart', 'touchmove', 'touchend', 'touchcancel'].forEach((eventName) => {
+  canvas.addEventListener(eventName, (event) => {
+    event.preventDefault();
+  }, { passive: false });
+});
+
 // Create runner - a runner is a loop that continuously calls the engine
 const runner = Runner.create();
 Runner.run(runner, engine);
@@ -117,6 +124,18 @@ document.addEventListener('mousemove', function(event) {
   const mouseX = event.clientX;
   Matter.Body.setPosition(paddle, { x: mouseX, y: paddle.position.y });
 });
+
+canvas.addEventListener('touchstart', function(event) {
+  const touch = event.touches[0];
+  if (!touch) return;
+  Matter.Body.setPosition(paddle, { x: touch.clientX, y: paddle.position.y });
+}, { passive: false });
+
+canvas.addEventListener('touchmove', function(event) {
+  const touch = event.touches[0];
+  if (!touch) return;
+  Matter.Body.setPosition(paddle, { x: touch.clientX, y: paddle.position.y });
+}, { passive: false });
 
 // Function to reset the ball position
 function resetBall() {
