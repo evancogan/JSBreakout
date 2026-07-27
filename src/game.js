@@ -1,0 +1,16 @@
+window.game = window.game || {};
+
+window.game.engine = null;
+window.game.world = null;
+window.game.render = null;
+window.game.runner = null;
+window.game.ground = null;
+window.game.topBoundary = null;
+window.game.leftWall = null;
+window.game.rightWall = null;
+window.game.ball = null;
+window.game.paddle = null;
+window.game.bricks = [];
+window.game.lives = 3;
+window.game.livesDisplay = null;
+window.game.paddleControlEnabled = false;
