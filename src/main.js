@@ -21,9 +21,6 @@ function createBall() {
     inertia: Infinity    // Prevents the ball from spinning
   });
   Composite.add(window.game.world, window.game.ball);
-  
-  // Give the ball an initial push
-  Matter.Body.setVelocity(window.game.ball, { x: 5, y: -5 });
 }
 
 // Function to create the paddle

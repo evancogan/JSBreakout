@@ -14,3 +14,4 @@ window.game.bricks = [];
 window.game.lives = 3;
 window.game.livesDisplay = null;
 window.game.paddleControlEnabled = false;
+window.game.gameStarted = false;

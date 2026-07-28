@@ -1,7 +1,11 @@
-
-// Event listener to enable paddle control on first click
+// Start the game on the first click and enable paddle control.
 document.addEventListener('click', function() {
+  if (window.game.gameStarted) return;
+
+  window.game.gameStarted = true;
   window.game.paddleControlEnabled = true;
+
+  Matter.Body.setVelocity(window.game.ball, { x: 5, y: -5 });
 }, { once: true });
 
 // Event listener for paddle movement
