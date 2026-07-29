@@ -59,6 +59,7 @@ createBricks();
 function resetBall() {
   Matter.Body.setPosition(window.game.ball, { x: 400, y: 300 });
   Matter.Body.setVelocity(window.game.ball, { x: 5, y: -5 });
+  window.game.paddleVelocityX = 0;
 }
 
 // Collision event to handle ball and brick collisions
@@ -71,8 +72,31 @@ Matter.Events.on(window.game.engine, 'collisionStart', function(event) {
     
     // Check if ball hits paddle
     if (bodyA === window.game.ball && bodyB === window.game.paddle || bodyB === window.game.ball && bodyA === window.game.paddle) {
-      // Reverse ball's vertical velocity
-      Matter.Body.setVelocity(window.game.ball, { x: window.game.ball.velocity.x, y: -Math.abs(window.game.ball.velocity.y) });
+      const paddle = window.game.paddle;
+      const ball = window.game.ball;
+      const paddleHalfWidth = (paddle.bounds.max.x - paddle.bounds.min.x) / 2;
+      const paddleHalfHeight = (paddle.bounds.max.y - paddle.bounds.min.y) / 2;
+      const ballRadius = ball.circleRadius || 0;
+
+      // Move ball above paddle to avoid repeated overlap collisions.
+      Matter.Body.setPosition(ball, {
+        x: ball.position.x,
+        y: paddle.position.y - paddleHalfHeight - ballRadius - 1
+      });
+
+      const hitOffset = ball.position.x - paddle.position.x;
+      const normalizedHitOffset = Math.max(-1, Math.min(1, hitOffset / paddleHalfWidth));
+      const maxBounceAngle = Math.PI / 3;
+      const bounceAngle = normalizedHitOffset * maxBounceAngle;
+
+      const currentSpeed = Math.max(5, Math.hypot(ball.velocity.x, ball.velocity.y));
+      const paddleVelocityX = window.game.paddleVelocityX || 0;
+      const boostedSpeed = Math.min(14, currentSpeed + Math.abs(paddleVelocityX) * 0.1);
+
+      const nextVelocityX = Math.sin(bounceAngle) * boostedSpeed + paddleVelocityX * 0.35;
+      const nextVelocityY = -Math.max(3, Math.cos(bounceAngle) * boostedSpeed);
+
+      Matter.Body.setVelocity(ball, { x: nextVelocityX, y: nextVelocityY });
     }
     
     // Check if ball hits bottom boundary, and, if so, reset ball and reduce life by 1
