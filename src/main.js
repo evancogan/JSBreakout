@@ -14,11 +14,12 @@ function reduceLife() {
 // Function to create the ball
 function createBall() {
   window.game.ball = Bodies.circle(400, 300, 15, { 
-    restitution: 1,      // Perfect bounce
-    friction: 0,         // No friction against surfaces
-    frictionAir: 0,      // No air resistance
+    restitution: 1.2, // Higher restitution value
+    friction: 0,
+    frictionAir: 0,
     frictionStatic: 0,
-    inertia: Infinity    // Prevents the ball from spinning
+    inertia: Infinity,
+    velocity: { x: 10, y: -10 }, // Increased initial velocity
   });
   Composite.add(window.game.world, window.game.ball);
 }
@@ -46,14 +47,11 @@ function createBricks() {
   }
 }
 
-
-// Start game loop //
-
+// Start game loop ///
 // Initialize game elements
 createBall();
 createPaddle();
 createBricks();
-
 
 // Function to reset the ball position
 function resetBall() {
@@ -72,7 +70,13 @@ Matter.Events.on(window.game.engine, 'collisionStart', function(event) {
     // Check if ball hits paddle
     if (bodyA === window.game.ball && bodyB === window.game.paddle || bodyB === window.game.ball && bodyA === window.game.paddle) {
       // Reverse ball's vertical velocity
-      Matter.Body.setVelocity(window.game.ball, { x: window.game.ball.velocity.x, y: -Math.abs(window.game.ball.velocity.y) });
+      const velocity = Matter.Body.getVelocity(window.game.ball);
+      velocity.y = -Math.abs(velocity.y);
+
+      // Add a random velocity addition/subtraction (upwards)
+      const randomVelocity = Math.random() * 10 - 5; // Increased random value
+      velocity.x += randomVelocity;
+      Matter.Body.setVelocity(window.game.ball, velocity);
     }
     
     // Check if ball hits bottom boundary, and, if so, reset ball and reduce life by 1
@@ -111,3 +115,4 @@ Matter.Events.on(window.game.engine, 'afterUpdate', function() {
     resetBall();
   }
 });
+

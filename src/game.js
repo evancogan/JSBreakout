@@ -1,5 +1,4 @@
 window.game = window.game || {};
-
 window.game.engine = null;
 window.game.world = null;
 window.game.render = null;
