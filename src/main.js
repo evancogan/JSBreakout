@@ -24,6 +24,21 @@ function createBall() {
   Composite.add(window.game.world, window.game.ball);
 }
 
+// Function to limit ball speed
+function limitBallSpeed() {
+  const maxSpeed = 20; // Set a maximum speed for the ball
+  const velocity = Matter.Body.getVelocity(window.game.ball);
+  const speed = Math.sqrt(velocity.x ** 2 + velocity.y ** 2);
+
+  if (speed > maxSpeed) {
+    const scale = maxSpeed / speed;
+    Matter.Body.setVelocity(window.game.ball, {
+      x: velocity.x * scale,
+      y: velocity.y * scale
+    });
+  }
+}
+
 // Function to create the paddle
 function createPaddle() {
   window.game.paddle = Bodies.rectangle(400, 550, 120, 20, { isStatic: true });
@@ -66,24 +81,47 @@ Matter.Events.on(window.game.engine, 'collisionStart', function(event) {
   // Loop through all collision pairs
   pairs.forEach(pair => {
     const { bodyA, bodyB } = pair;
-    
+
     // Check if ball hits paddle
     if (bodyA === window.game.ball && bodyB === window.game.paddle || bodyB === window.game.ball && bodyA === window.game.paddle) {
-      // Reverse ball's vertical velocity
-      const velocity = Matter.Body.getVelocity(window.game.ball);
-      velocity.y = -Math.abs(velocity.y);
+      const ballVelocity = Matter.Body.getVelocity(window.game.ball);
+      const paddleVelocity = Matter.Body.getVelocity(window.game.paddle);
+
+        // Reverse ball's vertical velocity
+      ballVelocity.y = -Math.abs(ballVelocity.y);
 
       // Add a random velocity addition/subtraction (upwards)
-      const randomVelocity = Math.random() * 10 - 5; // Increased random value
-      velocity.x += randomVelocity;
-      Matter.Body.setVelocity(window.game.ball, velocity);
+      const randomVelocity = Math.random() * 10 - 5;
+      ballVelocity.x += randomVelocity;
+
+      // Add paddle's velocity to the ball's velocity
+      ballVelocity.x += paddleVelocity.x * 0.5;
+
+      // Prevent 90-degree bounce
+      if (Math.abs(ballVelocity.y) > Math.abs(ballVelocity.x)) {
+        ballVelocity.x = ballVelocity.y > 0 ? 1 : -1;
+      }
+
+      // Add upward direction to the ball
+      ballVelocity.y -= 0.5; // Reduced upward force
+
+      // Limit ball speed after applying changes
+      const speed = Math.sqrt(ballVelocity.x ** 2 + ballVelocity.y ** 2);
+      if (speed > maxSpeed) {
+        const scale = maxSpeed / speed;
+        ballVelocity.x *= scale;
+        ballVelocity.y *= scale;
     }
-    
+
+      Matter.Body.setVelocity(window.game.ball, ballVelocity);
+  }
+
     // Check if ball hits bottom boundary, and, if so, reset ball and reduce life by 1
     if (bodyA === window.game.ball && bodyB === window.game.ground || bodyB === window.game.ball && bodyA === window.game.ground) {
-      resetBall();
-      reduceLife();
-    }
+    resetBall();
+    reduceLife();
+  }
+
     // Check if ball hits any brick
     window.game.bricks.forEach((brick, index) => {
       if (bodyA === window.game.ball && bodyB === brick || bodyB === window.game.ball && bodyA === brick) {
@@ -92,6 +130,12 @@ Matter.Events.on(window.game.engine, 'collisionStart', function(event) {
         window.game.bricks.splice(index, 1);
         // Reverse ball's vertical velocity
         Matter.Body.setVelocity(window.game.ball, { x: window.game.ball.velocity.x, y: -window.game.ball.velocity.y });
+
+        // Slow down the ball
+        Matter.Body.setVelocity(window.game.ball, {
+          x: window.game.ball.velocity.x * 0.9,
+          y: window.game.ball.velocity.y * 0.9
+        });
       }
     });
   });
@@ -99,20 +143,19 @@ Matter.Events.on(window.game.engine, 'collisionStart', function(event) {
 
 // Game loop to check for ball out of bounds
 Matter.Events.on(window.game.engine, 'afterUpdate', function() {
+  limitBallSpeed();
   if (window.game.ball.position.y > 600) {
     resetBall();
     reduceLife();
   }
-});
 
-// Check if lives reach -1, if so, end the game
-Matter.Events.on(window.game.engine, 'afterUpdate', function() {
   if (window.game.lives < 1) {
     alert('Game Over!');
-    // Reset lives and update display
     window.game.lives = 3;
     updateLivesDisplay();
     resetBall();
   }
 });
+
+
 
