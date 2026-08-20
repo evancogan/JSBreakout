@@ -54,7 +54,14 @@ function limitBallSpeed() {
 
 // Function to create the paddle
 function createPaddle() {
-  window.game.paddle = Bodies.rectangle(400, 550, PADDLE_WIDTH, PADDLE_HEIGHT, { isStatic: true });
+  window.game.paddle = Bodies.rectangle(400, 550, PADDLE_WIDTH, PADDLE_HEIGHT, {
+    isStatic: false,
+    inertia: Infinity,
+    frictionAir: 0,
+    friction: 0,
+    frictionStatic: 0
+  });
+
   Composite.add(window.game.world, window.game.paddle);
 }
 
